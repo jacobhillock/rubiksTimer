@@ -93,13 +93,17 @@ def draw(grid):
     pygame.display.update()
 
 
-
 def main():
     grid = generate()
     draw(grid)
 
     while True:
         for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                keys=pygame.key.get_pressed()
+                if keys[pygame.K_r]:
+                    grid = generate()
+                    draw(grid)
             if event.type == pygame.QUIT:
                 sys.exit()
 
