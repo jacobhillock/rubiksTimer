@@ -1,13 +1,22 @@
 from pyTwistyScrambler import scrambler333
 import pycuber as pc
 import pygame
+from pygame import (
+    QUIT,
+    K_r,
+    K_q,
+    KEYDOWN
+)
 import sys
+
+pygame.init()
+pygame.font.init()
 
 def generate():
     # create a random scramble according the the WCA scramble algorithm
     scramble = scrambler333.get_WCA_scramble()
     # scramble = scramble.split(" ")
-    print(scramble)
+    # print(scramble, len(scramble))
 
 
     # Create a Cube object
@@ -51,12 +60,11 @@ def generate():
     # for r in grid:
     #     print(r)
     
-    return grid
+    return grid, scramble
 
-def draw(grid):
+def draw(grid, scramble):
     # https://www.pygame.org/docs/tut/PygameIntro.html
     # startup for gui
-    pygame.init()
 
     pixel_size = 40
 
@@ -66,6 +74,7 @@ def draw(grid):
     screen = pygame.display.set_mode(size)
     black = pygame.Color(0, 0, 0)
     screen.fill(black)
+
     for i in range(len(grid)):
         for j in range(len(grid[i])):
             cl = grid[i][j]
@@ -90,21 +99,44 @@ def draw(grid):
             rect = pygame.Rect(y, x, l, l)
             pygame.draw.rect(screen, color, rect)
 
+    # pygame.display.update()
+
+    scramble_split = scramble.split(' ')
+    scramble_layers = []
+
+    t = ""
+    for s in scramble_split:
+        t += s + " "
+        if len(t) >= 18:
+            scramble_layers.append(t)
+            t = ""
+    scramble_layers.append(t)
+
+    for i in range(len(scramble_layers)):
+        size = 32
+        myfont = pygame.font.SysFont('Nato Mono', size)
+        textsurface = myfont.render(scramble_layers[i], True, (255,255,255))
+
+        screen.blit(textsurface, (6*pixel_size + 5, 6*pixel_size + 5 + i*size))
+
     pygame.display.update()
 
 
 def main():
-    grid = generate()
-    draw(grid)
+    grid, scramble = generate()
+    draw(grid, scramble)
 
     while True:
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
+            if event.type == KEYDOWN:
                 keys=pygame.key.get_pressed()
-                if keys[pygame.K_r]:
-                    grid = generate()
-                    draw(grid)
-            if event.type == pygame.QUIT:
+                if keys[K_r]:
+                    grid, scramble = generate()
+                    draw(grid, scramble)
+                if keys[K_q]:
+                    sys.exit()
+
+            if event.type == QUIT:
                 sys.exit()
 
 if __name__ == "__main__":
