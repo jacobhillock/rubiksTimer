@@ -5,12 +5,26 @@ from pygame import (
     QUIT,
     K_r,
     K_q,
-    KEYDOWN
+    KEYDOWN,
+    K_SPACE
 )
-import sys
+import sys, time
 
 pygame.init()
 pygame.font.init()
+
+# constants for the program
+FPS = 19
+spf = 1 / FPS
+FONT_SIZE = 32
+PIXEL_SIZE = 40
+myfont = pygame.font.SysFont('Nato Mono', FONT_SIZE)
+
+height = 9 * PIXEL_SIZE + 1
+width = 12 * PIXEL_SIZE
+size = width, height
+screen = pygame.display.set_mode(size)
+
 
 def generate():
     # create a random scramble according the the WCA scramble algorithm
@@ -62,16 +76,10 @@ def generate():
     
     return grid, scramble
 
-def draw(grid, scramble):
+def draw_cube(grid, scramble):
     # https://www.pygame.org/docs/tut/PygameIntro.html
     # startup for gui
 
-    pixel_size = 40
-
-    height = len(grid) * pixel_size + 1
-    width = len(grid[0]) * pixel_size
-    size = width, height
-    screen = pygame.display.set_mode(size)
     black = pygame.Color(0, 0, 0)
     screen.fill(black)
 
@@ -93,14 +101,13 @@ def draw(grid, scramble):
             elif cl == 'g':
                 color = pygame.Color(0, 255, 0)
             
-            x = i * pixel_size
-            y = j * pixel_size
-            l = pixel_size - 1
+            x = i * PIXEL_SIZE
+            y = j * PIXEL_SIZE
+            l = PIXEL_SIZE - 1
             rect = pygame.Rect(y, x, l, l)
             pygame.draw.rect(screen, color, rect)
 
     # pygame.display.update()
-
     scramble_split = scramble.split(' ')
     scramble_layers = []
 
@@ -113,31 +120,70 @@ def draw(grid, scramble):
     scramble_layers.append(t)
 
     for i in range(len(scramble_layers)):
-        size = 32
-        myfont = pygame.font.SysFont('Nato Mono', size)
         textsurface = myfont.render(scramble_layers[i], True, (255,255,255))
+        screen.blit(textsurface, (6*PIXEL_SIZE + 5, 6*PIXEL_SIZE + 5 + i*FONT_SIZE))
 
-        screen.blit(textsurface, (6*pixel_size + 5, 6*pixel_size + 5 + i*size))
+    pygame.display.update()
+
+    draw_time(0, 0, False)
+
+def draw_time(t0, t1, started):
+    time = "0:00.000"
+    if started: 
+        net = t1 - t0
+        m = int(net / 60)
+        s = net % 60
+        # ss = f"{round(s, 3)}"
+        if s < 10:
+            s = "0" + f"{round(s, 3)}"
+        else:
+            s = f"{round(s, 3)}"
+        
+        time = f"{round(m, 0)}:{s}"
+
+
+    pygame.draw.rect(screen, (0,0,0), pygame.Rect(6*PIXEL_SIZE+5, PIXEL_SIZE, int(3.4*PIXEL_SIZE), int(.7*PIXEL_SIZE)))
+
+    textsurface = myfont.render(time, True, (255,255,255))
+    screen.blit(textsurface, (6*PIXEL_SIZE + 50, PIXEL_SIZE + 3))
 
     pygame.display.update()
 
 
 def main():
+    t0 = time.time()
     grid, scramble = generate()
-    draw(grid, scramble)
+    start = False
+    draw_cube(grid, scramble)
 
     while True:
-        for event in pygame.event.get():
-            if event.type == KEYDOWN:
-                keys=pygame.key.get_pressed()
-                if keys[K_r]:
-                    grid, scramble = generate()
-                    draw(grid, scramble)
-                if keys[K_q]:
-                    sys.exit()
+        # Draw the time on the cube screen
+        draw_time(t0, time.time(), start)
+        fTime0 = time.time()
 
-            if event.type == QUIT:
-                sys.exit()
+        # frame rate holding, also where keyboard input happens
+        while time.time() - fTime0 < spf:
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    keys=pygame.key.get_pressed()
+                    new = False
+                    if keys[K_SPACE]:
+                        if not start:
+                            t0 = time.time()
+                            start = True
+                        else:
+                            print(round(time.time() - t0, 3))
+                            start = False
+                            new = True
+                    if keys[K_r] or new:
+                        grid, scramble = generate()
+                        draw_cube(grid, scramble)
+                        new = False
+                    if keys[K_q]:
+                        sys.exit()
+
+                if event.type == QUIT:
+                    sys.exit()
 
 if __name__ == "__main__":
     main()
