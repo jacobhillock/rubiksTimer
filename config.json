@@ -1,0 +1,9 @@
+{
+    "up_color": [255, 255, 255],
+    "down_color": [255, 255, 0],
+    "right_color": [255, 0, 0],
+    "left_color": [255, 165, 0],
+    "back_color": [0, 0, 255],
+    "front_color": [0, 255, 0]
+
+}

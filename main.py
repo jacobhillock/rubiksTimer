@@ -1,6 +1,7 @@
 from pyTwistyScrambler import scrambler333
 import pycuber as pc
 import pygame
+import json
 from pygame import (
     QUIT,
     K_r,
@@ -25,6 +26,9 @@ width = 12 * PIXEL_SIZE
 size = width, height
 screen = pygame.display.set_mode(size)
 
+config = {}
+with open("config.json") as conf:
+    config = json.load(conf)
 
 def generate():
     # create a random scramble according the the WCA scramble algorithm
@@ -62,13 +66,17 @@ def generate():
     for r in range(len(grid)):
         for c in range(len(grid[r])):
             if grid[r][c] == 'o':
-                grid[r][c] = 'r'
+                grid[r][c] = 'right'
             elif grid[r][c] == 'r':
-                grid[r][c] = 'o'
-            elif grid[r][c] == 'w':
-                grid[r][c] = 'y'
+                grid[r][c] = 'left'
             elif grid[r][c] == 'y':
-                grid[r][c] = 'w'
+                grid[r][c] = 'up'
+            elif grid[r][c] == 'w':
+                grid[r][c] = 'down'
+            elif grid[r][c] == 'g':
+                grid[r][c] = 'front'
+            elif grid[r][c] == 'b':
+                grid[r][c] = 'back'
     
     # print grid (for debugging)
     # for r in grid:
@@ -86,20 +94,20 @@ def draw_cube(grid, scramble):
     for i in range(len(grid)):
         for j in range(len(grid[i])):
             cl = grid[i][j]
-            color = pygame.Color(0, 0, 0)
+            color = [0, 0, 0]
 
-            if cl == 'w':
-                color = pygame.Color(255, 255, 255)
-            elif cl == 'y':
-                color = pygame.Color(255, 255, 0)
-            elif cl == 'r':
-                color = pygame.Color(255, 0, 0)
-            elif cl == 'o':
-                color = pygame.Color(255, 165, 0)
-            elif cl == 'b':
-                color = pygame.Color(0, 0, 255)
-            elif cl == 'g':
-                color = pygame.Color(0, 255, 0)
+            if cl == 'up':
+                color = config["up_color"]
+            elif cl == 'down':
+                color = config["down_color"]
+            elif cl == 'right':
+                color = config["right_color"]
+            elif cl == 'left':
+                color = config["left_color"]
+            elif cl == 'back':
+                color = config["back_color"]
+            elif cl == 'front':
+                color = config["front_color"]
             
             x = i * PIXEL_SIZE
             y = j * PIXEL_SIZE
