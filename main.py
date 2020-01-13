@@ -108,7 +108,7 @@ def draw_cube(grid, scramble):
                 color = config["back_color"]
             elif cl == 'front':
                 color = config["front_color"]
-            
+
             x = i * PIXEL_SIZE
             y = j * PIXEL_SIZE
             l = PIXEL_SIZE - 1
