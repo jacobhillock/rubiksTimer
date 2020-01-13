@@ -9,7 +9,7 @@ from pygame import (
     KEYDOWN,
     K_SPACE
 )
-import sys, time
+import sys, os, time, datetime
 
 pygame.init()
 pygame.font.init()
@@ -30,6 +30,7 @@ config = {}
 with open("config.json") as conf:
     config = json.load(conf)
 
+# generates a scrambled 3x3x3 rubik's cube and save it as a 2d cube net
 def generate():
     # create a random scramble according the the WCA scramble algorithm
     scramble = scrambler333.get_WCA_scramble()
@@ -84,6 +85,7 @@ def generate():
     
     return grid, scramble
 
+# draws the rubik's cube and shows text based scramble
 def draw_cube(grid, scramble):
     # https://www.pygame.org/docs/tut/PygameIntro.html
     # startup for gui
@@ -93,21 +95,7 @@ def draw_cube(grid, scramble):
 
     for i in range(len(grid)):
         for j in range(len(grid[i])):
-            cl = grid[i][j]
-            color = [0, 0, 0]
-
-            if cl == 'up':
-                color = config["up_color"]
-            elif cl == 'down':
-                color = config["down_color"]
-            elif cl == 'right':
-                color = config["right_color"]
-            elif cl == 'left':
-                color = config["left_color"]
-            elif cl == 'back':
-                color = config["back_color"]
-            elif cl == 'front':
-                color = config["front_color"]
+            color = config.get(grid[i][j], [0,0,0])
 
             x = i * PIXEL_SIZE
             y = j * PIXEL_SIZE
@@ -135,20 +123,25 @@ def draw_cube(grid, scramble):
 
     draw_time(0, 0, False)
 
+#
+def format_time(time):
+    
+    m = int(time / 60)
+    s = time % 60
+    # ss = f"{round(s, 3)}"
+    if s < 10:
+        s = "0" + f"{round(s, 3)}"
+    else:
+        s = f"{round(s, 3)}"
+    
+    return f"{round(m, 0)}:{s}"
+
+
 def draw_time(t0, t1, started):
     time = "0:00.000"
     if started: 
         net = t1 - t0
-        m = int(net / 60)
-        s = net % 60
-        # ss = f"{round(s, 3)}"
-        if s < 10:
-            s = "0" + f"{round(s, 3)}"
-        else:
-            s = f"{round(s, 3)}"
-        
-        time = f"{round(m, 0)}:{s}"
-
+        time = format_time(net)
 
     pygame.draw.rect(screen, (0,0,0), pygame.Rect(6*PIXEL_SIZE+5, PIXEL_SIZE, int(3.4*PIXEL_SIZE), int(.7*PIXEL_SIZE)))
 
@@ -156,6 +149,30 @@ def draw_time(t0, t1, started):
     screen.blit(textsurface, (6*PIXEL_SIZE + 50, PIXEL_SIZE + 3))
 
     pygame.display.update()
+
+def update_times(time):
+    print(round(time, 3))
+    now = datetime.datetime.now()
+    format_now = now.isoformat().split('T')
+    dict_ = {
+        'date': format_now[0],
+        'timeOfDay': format_now[1].split('.')[0],
+        'time': round(time, 3),
+        'readable': format_time(time)
+        }
+    
+    path = "./times"
+    dirs = os.listdir(path)
+    f_name = f"{format_now[0]}.csv"
+    header = False
+    if f_name not in dirs:
+        header = True
+    with open(f'{path}/{f_name}', 'a') as file_:
+        if header:
+            file_.write("Date, Time of Day, Time, Readable\n")
+        file_.write(f"{dict_['date']}, {dict_['timeOfDay']}, {dict_['time']}, {dict_['readable']}\n")
+
+    print(dict_)
 
 
 def main():
@@ -180,7 +197,8 @@ def main():
                             t0 = time.time()
                             start = True
                         else:
-                            print(round(time.time() - t0, 3))
+                            solve_t = time.time() - t0
+                            update_times(solve_t)
                             start = False
                             new = True
                     if keys[K_r] or new:
