@@ -1,6 +1,7 @@
 from pyTwistyScrambler import scrambler333
 import pycuber as pc
 import pygame
+import json
 from pygame import (
     QUIT,
     K_r,
@@ -8,7 +9,7 @@ from pygame import (
     KEYDOWN,
     K_SPACE
 )
-import sys, time
+import sys, os, time, datetime
 
 pygame.init()
 pygame.font.init()
@@ -25,7 +26,11 @@ width = 12 * PIXEL_SIZE
 size = width, height
 screen = pygame.display.set_mode(size)
 
+config = {}
+with open("config.json") as conf:
+    config = json.load(conf)
 
+# generates a scrambled 3x3x3 rubik's cube and save it as a 2d cube net
 def generate():
     # create a random scramble according the the WCA scramble algorithm
     scramble = scrambler333.get_WCA_scramble()
@@ -62,13 +67,17 @@ def generate():
     for r in range(len(grid)):
         for c in range(len(grid[r])):
             if grid[r][c] == 'o':
-                grid[r][c] = 'r'
+                grid[r][c] = 'right'
             elif grid[r][c] == 'r':
-                grid[r][c] = 'o'
-            elif grid[r][c] == 'w':
-                grid[r][c] = 'y'
+                grid[r][c] = 'left'
             elif grid[r][c] == 'y':
-                grid[r][c] = 'w'
+                grid[r][c] = 'up'
+            elif grid[r][c] == 'w':
+                grid[r][c] = 'down'
+            elif grid[r][c] == 'g':
+                grid[r][c] = 'front'
+            elif grid[r][c] == 'b':
+                grid[r][c] = 'back'
     
     # print grid (for debugging)
     # for r in grid:
@@ -76,6 +85,7 @@ def generate():
     
     return grid, scramble
 
+# draws the rubik's cube and shows text based scramble
 def draw_cube(grid, scramble):
     # https://www.pygame.org/docs/tut/PygameIntro.html
     # startup for gui
@@ -85,22 +95,8 @@ def draw_cube(grid, scramble):
 
     for i in range(len(grid)):
         for j in range(len(grid[i])):
-            cl = grid[i][j]
-            color = pygame.Color(0, 0, 0)
+            color = config.get(grid[i][j], [0,0,0])
 
-            if cl == 'w':
-                color = pygame.Color(255, 255, 255)
-            elif cl == 'y':
-                color = pygame.Color(255, 255, 0)
-            elif cl == 'r':
-                color = pygame.Color(255, 0, 0)
-            elif cl == 'o':
-                color = pygame.Color(255, 165, 0)
-            elif cl == 'b':
-                color = pygame.Color(0, 0, 255)
-            elif cl == 'g':
-                color = pygame.Color(0, 255, 0)
-            
             x = i * PIXEL_SIZE
             y = j * PIXEL_SIZE
             l = PIXEL_SIZE - 1
@@ -127,20 +123,25 @@ def draw_cube(grid, scramble):
 
     draw_time(0, 0, False)
 
+#
+def format_time(time):
+    
+    m = int(time / 60)
+    s = time % 60
+    # ss = f"{round(s, 3)}"
+    if s < 10:
+        s = "0" + f"{round(s, 3)}"
+    else:
+        s = f"{round(s, 3)}"
+    
+    return f"{round(m, 0)}:{s}"
+
+
 def draw_time(t0, t1, started):
     time = "0:00.000"
     if started: 
         net = t1 - t0
-        m = int(net / 60)
-        s = net % 60
-        # ss = f"{round(s, 3)}"
-        if s < 10:
-            s = "0" + f"{round(s, 3)}"
-        else:
-            s = f"{round(s, 3)}"
-        
-        time = f"{round(m, 0)}:{s}"
-
+        time = format_time(net)
 
     pygame.draw.rect(screen, (0,0,0), pygame.Rect(6*PIXEL_SIZE+5, PIXEL_SIZE, int(3.4*PIXEL_SIZE), int(.7*PIXEL_SIZE)))
 
@@ -148,6 +149,30 @@ def draw_time(t0, t1, started):
     screen.blit(textsurface, (6*PIXEL_SIZE + 50, PIXEL_SIZE + 3))
 
     pygame.display.update()
+
+def update_times(time):
+    print(round(time, 3))
+    now = datetime.datetime.now()
+    format_now = now.isoformat().split('T')
+    dict_ = {
+        'date': format_now[0],
+        'timeOfDay': format_now[1].split('.')[0],
+        'time': round(time, 3),
+        'readable': format_time(time)
+        }
+    
+    path = "./times"
+    dirs = os.listdir(path)
+    f_name = f"{format_now[0]}.csv"
+    header = False
+    if f_name not in dirs:
+        header = True
+    with open(f'{path}/{f_name}', 'a') as file_:
+        if header:
+            file_.write("Date, Time of Day, Time, Readable\n")
+        file_.write(f"{dict_['date']}, {dict_['timeOfDay']}, {dict_['time']}, {dict_['readable']}\n")
+
+    print(dict_)
 
 
 def main():
@@ -172,7 +197,8 @@ def main():
                             t0 = time.time()
                             start = True
                         else:
-                            print(round(time.time() - t0, 3))
+                            solve_t = time.time() - t0
+                            update_times(solve_t)
                             start = False
                             new = True
                     if keys[K_r] or new:
