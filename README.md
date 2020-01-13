@@ -15,7 +15,7 @@ This software is being created because I am a studying data science student and 
     - Go to download location and extract
 
 3. Create Virtual Environment
-    Windows:
+    - Windows:
     - Press SHIFT and RIGHT CLICK in folder
     - LEFT CLICK 'Open PowerShell window here'
     - run:
@@ -23,8 +23,8 @@ This software is being created because I am a studying data science student and 
     py -m venv venv
     ```
     
-    Linux/IOS:
-    In terminal:
+    - Linux/IOS:
+    - In terminal:
     ```
     cd LOCATION OF CODE
     python -m venv venv
