@@ -41,4 +41,4 @@ pip install -r requirements.txt
 
 6. Run Application
     - Windows:   *double click* launch.bat
-    - Linux/IOS: run launch.sh
+    - Linux/IOS: run 'bash launch.sh'
