@@ -42,3 +42,28 @@ pip install -r requirements.txt
 6. Run Application
     - Windows:   *double click* launch.bat
     - Linux/IOS: run 'bash launch.sh'
+
+
+# Update log
+- v0.1 Create project
+    - Shows scramble in terminal
+    - Shows scrambled state
+    - Basic Hotkeys
+
+- v0.2 Scamble on Screen
+    - Shows scramble on screen
+    - Slight refactor
+
+- v0.3 Timer
+    - Added timer functionality
+    - Optimize a bit
+
+- v0.4 Data
+    - Refactor some code
+    - Added Config
+    - Added launch scripts
+    - Created Readme
+
+- v0.5 Support
+    - Added windows support
+    - Added a zip for venv
