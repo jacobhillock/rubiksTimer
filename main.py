@@ -161,7 +161,14 @@ def update_times(time):
         'readable': format_time(time)
         }
     
-    path = "./times"
+    directory = os.path.dirname(os.path.realpath(__file__))
+    time_folder = "/times/"
+    if sys.platform == 'win32':
+        time_folder = "\\times\\"
+    path = directory + time_folder
+
+    print(path)
+
     dirs = os.listdir(path)
     f_name = f"{format_now[0]}.csv"
     header = False
