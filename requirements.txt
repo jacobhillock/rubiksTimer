@@ -7,7 +7,7 @@ packaging==20.0
 pycuber==0.2.2
 PyExecJS==1.5.1
 pygame==2.0.0.dev6
-pylint==2.4.4
+pylint==4.0.9
 pyparsing==2.4.6
 pyTwistyScrambler==1.2
 six==1.13.0
